@@ -9,8 +9,15 @@ interface OceanProps {
   onSlotClick?: (zone: Zone, diveSite: DiveSite, rowIndex: number) => void;
 }
 
-const ZONES: Zone[] = ['sunlight', 'twilight', 'midnight'];
 const DIVE_SITES: DiveSite[] = ['red', 'blue', 'green'];
+const TOTAL_ROWS = 6;
+
+// Define which zone each row belongs to
+const getZoneForRow = (rowIndex: number): Zone => {
+  if (rowIndex <= 2) return 'sunlight';    // Rows 0-2: Sunlight
+  if (rowIndex === 3) return 'twilight';   // Row 3: Twilight
+  return 'midnight';                       // Rows 4-5: Midnight
+};
 
 export const Ocean: React.FC<OceanProps> = ({
   player,
@@ -78,55 +85,53 @@ export const Ocean: React.FC<OceanProps> = ({
               {diveSite.toUpperCase()} Dive Site
             </div>
 
-            {ZONES.map(zone => {
-              const fish = getFishInZoneAndSite(zone, diveSite);
-              const maxSlots = 5; // Cards per zone
-
+            {/* 6 rows, each row is a depth level */}
+            {Array.from({ length: TOTAL_ROWS }).map((_, rowIndex) => {
+              const zone = getZoneForRow(rowIndex);
+              const fishInZone = getFishInZoneAndSite(zone, diveSite);
+              const fishAtRow = fishInZone[rowIndex]; // Get the fish at this specific row
+              
               return (
                 <div
-                  key={`${diveSite}-${zone}`}
+                  key={`${diveSite}-row-${rowIndex}`}
                   className="zone"
                   style={{ backgroundColor: getZoneColor(zone) }}
                 >
-                  <div className="zone-label">{zone.toUpperCase()}</div>
+                  <div className="zone-label">
+                    {zone.toUpperCase()} - Depth {rowIndex}
+                  </div>
                   
                   <div className="fish-row">
-                    {Array.from({ length: maxSlots }).map((_, rowIndex) => {
-                      const fish = fish[rowIndex];
-                      return (
-                        <div
-                          key={`slot-${rowIndex}`}
-                          className={`fish-slot ${fish ? 'occupied' : 'empty'} ${
-                            isYourTurn ? 'clickable' : ''
-                          }`}
-                          onClick={() => {
-                            if (fish && onFishClick) {
-                              onFishClick(fish);
-                            } else if (!fish && onSlotClick) {
-                              onSlotClick(zone, diveSite, rowIndex);
-                            }
-                          }}
-                        >
-                          {fish ? (
-                            <div className="fish-card">
-                              <div className="fish-name">{fish.card.name}</div>
-                              <div className="fish-points">{fish.card.points} pts</div>
-                              <div className="fish-tokens">
-                                {fish.eggs > 0 && (
-                                  <span className="egg-token">{fish.eggs}🥚</span>
-                                )}
-                                {fish.young > 0 && (
-                                  <span className="young-token">{fish.young}🐟</span>
-                                )}
-                                {fish.hasSchool && <span className="school-token">🐠</span>}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="empty-slot">+</div>
-                          )}
+                    <div
+                      className={`fish-slot ${fishAtRow ? 'occupied' : 'empty'} ${
+                        isYourTurn ? 'clickable' : ''
+                      }`}
+                      onClick={() => {
+                        if (fishAtRow && onFishClick) {
+                          onFishClick(fishAtRow);
+                        } else if (!fishAtRow && onSlotClick) {
+                          onSlotClick(zone, diveSite, rowIndex);
+                        }
+                      }}
+                    >
+                      {fishAtRow ? (
+                        <div className="fish-card">
+                          <div className="fish-name">{fishAtRow.card.name}</div>
+                          <div className="fish-points">{fishAtRow.card.points} pts</div>
+                          <div className="fish-tokens">
+                            {fishAtRow.eggs > 0 && (
+                              <span className="egg-token">{fishAtRow.eggs}🥚</span>
+                            )}
+                            {fishAtRow.young > 0 && (
+                              <span className="young-token">{fishAtRow.young}🐟</span>
+                            )}
+                            {fishAtRow.hasSchool && <span className="school-token">🐠</span>}
+                          </div>
                         </div>
-                      );
-                    })}
+                      ) : (
+                        <div className="empty-slot">+</div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

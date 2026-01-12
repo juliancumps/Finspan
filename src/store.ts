@@ -24,10 +24,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   initializeGame: (playerNames: string[], yourId: string) => {
     const engine = new FinspanEngine(playerNames);
+    const gameState = engine.getGameState();
+    
+    // Map the first player to the current user's peerId
+    // In a real multiplayer game, you'd need better player tracking
+    const gamePlayerId = gameState.players[0].playerId;
+    
     set({
       gameEngine: engine,
-      gameState: engine.getGameState(),
-      playerId: yourId,
+      gameState: gameState,
+      playerId: gamePlayerId,
       isHost: true
     });
   },

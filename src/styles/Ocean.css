@@ -43,7 +43,7 @@
 
 .dive-sites-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 155px);
   gap: 15px;
 }
 
@@ -51,7 +51,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 3px solid;
   border-radius: 8px;
-  padding: 10px;
+  padding: 5px;
   overflow: hidden;
 }
 
